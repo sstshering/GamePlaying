@@ -1,15 +1,12 @@
-# import main
-
-# class ConnectFour: #get from somewehre
-#     def __init__(self, board):
-#         self.board=board
+import main
+import Algorithms
 
 #! /usr/bin/env python3
 # REFERENCE https://gist.github.com/poke/6934842
 
 from itertools import groupby, chain
 
-NONE = '.'
+NONE = 'O'
 RED = 'R'
 YELLOW = 'Y'
 
@@ -24,12 +21,12 @@ def diagonalsNeg (matrix, cols, rows):
 		yield [matrix[i][j] for i, j in di if i >= 0 and j >= 0 and i < cols and j < rows]
 
 class Game:
-	def __init__ (self, cols = 7, rows = 6, requiredToWin = 4):
+	def __init__ (self, board, cols = 7, rows = 6, requiredToWin = 4):
 		"""Create a new game."""
 		self.cols = cols
 		self.rows = rows
 		self.win = requiredToWin
-		self.board = [[NONE] * rows for _ in range(cols)]
+		self.board = board
 
 	def insert (self, column, color):
 		"""Insert the color in the given column."""
