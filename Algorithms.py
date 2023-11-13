@@ -1,7 +1,6 @@
 import connectFour 
 import random
 
-
 class Algorithms:
     def __init__(self, game):
         self.game = game
@@ -15,34 +14,34 @@ class Algorithms:
         print("Player's selected move:", selected_move)
         return selected_move
 
-    @staticmethod
-    def dLMinMax(game_play, param):
-        goal = connectFour.Game.win
-        legal_moves = [col for col in range(connectFour.Game.cols) if connectFour.Game.board[col][0] == "O"]
-        best_move = None
-        best_value = float('-inf')
+    def dLMinMax(self, param):
+        goal = self.game.win
+        legal_moves = self.game.legalMoves()
+
+        print("Column:\tScore")
+        scores = []
 
         for move in legal_moves:
-            new_board = connectFour.Game.makeMove(move, connectFour.Game.currentPlayer)
-            value = Algorithms.minmax(new_board, goal, param - 1, float('-inf'), float('+inf'), False)
+            new_board = self.game.makeMove(move, self.game.currentPlayer)
+            value = self.minmax(new_board, goal, param - 1, float('-inf'), float('+inf'), False)
+            scores.append(value)
+            print("Column {}: {:.2f}".format(int(move) + 1, float(str(value))))
 
-            if value > best_value:
-                best_value = value
-                best_move = move
+        best_move = legal_moves[scores.index(max(scores))]
 
-        print("Player's selected move:", best_move)
+        print("FINAL Move selected: {}".format(float(best_move)))
         return best_move
 
-    @staticmethod
-    def minmax(board, goal, depth, alpha, beta, max_player):
-        if depth == 0 or connectFour.Game.isWinner() or connectFour.Game.isFull():
-            return Algorithms.evaluate(board)
+
+    def minmax(self, board, goal, depth, alpha, beta, max_player):
+        if depth == 0 or self.game.isWinner(self.game.currentPlayer) or self.game.isFull():
+            return self.evaluate(board)
 
         if max_player:
             max_eval = float('-inf')
-            for move in connectFour.Game.legalMoves():
-                new_board = connectFour.Game.makeMove(move, connectFour.Game.currentPlayer)
-                eval = Algorithms.minmax(new_board, goal, depth - 1, alpha, beta, False)
+            for move in self.game.legalMoves():
+                new_board = self.game.makeMove(move, self.game.currentPlayer)
+                eval = self.minmax(new_board, goal, depth - 1, alpha, beta, False)
                 max_eval = max(max_eval, eval)
                 alpha = max(alpha, eval)
                 if beta <= alpha:
@@ -50,25 +49,22 @@ class Algorithms:
             return max_eval
         else:
             min_eval = float('+inf')
-            for move in connectFour.Game.legalMoves():
-                new_board = connectFour.Game.makeMove(move, connectFour.Game.currentPlayer)
-                eval = Algorithms.minmax(new_board, goal, depth - 1, alpha, beta, True)
+            for move in self.game.legalMoves():
+                new_board = self.game.makeMove(move, self.game.currentPlayer)
+                eval = self.minmax(new_board, goal, depth - 1, alpha, beta, True)
                 min_eval = min(min_eval, eval)
                 beta = min(beta, eval)
                 if beta <= alpha:
                     break
             return min_eval
 
-    @staticmethod
-    def evaluate(board):
+    def evaluate(self, board):
         # You need to implement a proper evaluation function based on the state of the board.
         # Return a value representing the desirability of the board state for the current player.
         pass
 
-    @staticmethod
-    def monteCarloGS(algo, param):
+    def monteCarloGS(self, param):
         return
 
-    @staticmethod
-    def upperConfidenceBound(algo, param):
+    def upperConfidenceBound(self,param):
         return
