@@ -1,17 +1,7 @@
 import sys
 import connectFour
-import Algorithms
+from Algorithms import Algorithms
 import random
-         
-def readBoard(filename):
-    with open(filename, 'r') as file:
-        lines = file.read().splitlines()  
-    algorithm = lines[0]
-    param = lines[1]
-    player = lines[2]
-    board = [list(row) for row in lines[3:]]
-
-    return algorithm, param, player, board
 
 def main():
     if len(sys.argv) != 3:
@@ -21,21 +11,37 @@ def main():
     filename = sys.argv[1]
     verboseType = sys.argv[2]
     
-    algorithm, param, player, board = readBoard(filename)
+    algorithm, param, player, board = connectFour.readBoard(filename)
     
     #call connectFour class with board state
-    gamePlay = connectFour.Game(board)
+    gamePlay = connectFour.Game(board,player)
+    
+    Algorithms_inst = Algorithms(gamePlay)
+    print(algorithm)
+    # output = output.uniformRandom()
+    # print(output)
     
     #call methods according to the algorithm type
-    if algorithm == "UR":
-        output = Algorithms.uniformRandom(algorithm, param)
-    elif algorithm == "DLMM":
-        output = Algorithms.dLMinMax(gamePlay, int(param))
-    elif algorithm == "PMCGS":
-        output = Algorithms.monteCarloGS(algorithm, param)
-    elif algorithm == "UCT":
-        output = Algorithms.upperConfidenceBound(algorithm, param)
-        
+    try:
+        if algorithm == "UR":
+            print("works")
+            output = Algorithms_inst.uniformRandom()
+            print(output)
+        # elif algorithm == "DLMM":
+        #     output = Algorithms.dLMinMax(gamePlay, int(param))
+        # elif algorithm == "PMCGS":
+        #     output = Algorithms.monteCarloGS(gamePlay, int(param))  # Fix: Pass gamePlay instead of algorithm
+        # elif algorithm == "UCT":
+        #     output = Algorithms.upperConfidenceBound(gamePlay, int(param))
+        else:
+            print("Invalid algorithm:", algorithm)
+            sys.exit(1)
+            
+        print("FINAL Move selected:", output)
+    except Exception as e:
+        print("An exception occurred: {}".format(e))
+
+    # print(Algorithms.uniformRandom(gamePlay))   
     #Verbosity type = controls what your algorithm will print for output
     if verboseType == "Verbose":# Print detailed info
         print("Verbose output")
