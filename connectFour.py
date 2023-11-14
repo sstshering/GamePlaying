@@ -5,6 +5,7 @@ import Algorithms
 
 from itertools import groupby, chain
 
+# read board info from the txt file
 def readBoard(filename):
     with open(filename, 'r') as file:
         lines = file.read().splitlines()  
@@ -55,6 +56,7 @@ class Game:
         if self.isWinner(color):
             #self.printBoard()
             raise Exception(color + ' won!')
+            # print(color + ' won!')
 
         if self.isFull():
             #self.printBoard()
