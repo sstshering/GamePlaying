@@ -93,8 +93,8 @@ class Algorithms:
 
         return color_count
     
-    #Algo 3
-    def monteCarloGS(self, param, verboseType):
+    #Algo 3 & 4
+    def MCGSUCT(self, param, verboseType, algorithm):
         legal_moves = self.game.legalMoves()
 
         if not legal_moves:
@@ -113,8 +113,12 @@ class Algorithms:
                 # Check if the game has ended
                 if game_ended:
                     break
-
-                result = self.rolloutRandom()
+                
+                if algorithm == "UCT":
+                    result = self.UCT(new_board, simulations)
+                else:  # PMCGS
+                    result = self.PMCGS()
+              
                 simulations += 1
 
                 if result == 1:
@@ -140,12 +144,16 @@ class Algorithms:
 
         if total_simulations == 0:
             return None
+        
+        # Check if legal_moves is empty before finding the best move
+        if legal_moves:
+            best_move = legal_moves[scores.index(max(scores))]
+            return best_move
+        else:
+            return None
 
-        best_move = legal_moves[scores.index(max(scores))]
-
-        return best_move
-
-    def rolloutRandom(self):
+    # ALgo 3
+    def PMCGS(self):
         # Create a copy of the game object to avoid modifying the original state
         game_copy = self.game.copy()
 
@@ -169,6 +177,32 @@ class Algorithms:
             )
 
     # Algo 4
-    def upperConfidenceBound(self, param, verboseType):
-        pass
+    def UCT(self, board, parent_simulations):
+        if parent_simulations == 0:
+            return float('inf')  #for the first simulation
+
+        exploration_constant = 1.4  
+
+        # Calculate UCT values for all children
+        uct_values = []
+        for move in self.game.legalMoves():
+            new_board = self.game.makeMove(move, self.game.currentPlayer)[0]
+            child_simulations = 0  # You may need to get the actual number of simulations for this child
+
+            # Handle the case where child_simulations is zero
+            if child_simulations == 0:
+                uct_value = float('inf')
+            else:
+                uct_value = self.evaluate(board) + exploration_constant * (
+                        (parent_simulations / child_simulations) ** 0.5)
+            
+            uct_values.append(uct_value)
+
+        # Choose the move with the highest UCT value
+        best_move = self.game.legalMoves()[uct_values.index(max(uct_values))]
+
+        return best_move
+
+
+
        
