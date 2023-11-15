@@ -91,3 +91,17 @@ class Game:
         print('  '.join(map(str, range(self.cols))))
         for y in range(self.rows):
             print('  '.join(str(self.board[x][y]) for x in range(self.cols)))
+    
+    def count_lines(self, board, color):
+        lines = (
+            board,  # columns
+            zip(*board),  # rows
+            diagonalsPos(board, self.cols, self.rows),  # positive diagonals
+            diagonalsNeg(board, self.cols, self.rows)  # negative diagonals
+        )
+
+        color_count = 0
+        for line in chain(*lines):
+            color_count += line.count(color)
+
+        return color_count

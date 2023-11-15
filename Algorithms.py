@@ -1,6 +1,5 @@
 import connectFour 
 import random
-from itertools import chain
 
 class Algorithms:
     def __init__(self, game):
@@ -69,27 +68,14 @@ class Algorithms:
         player = self.game.currentPlayer
         opponent = connectFour.Game.RED if player == connectFour.Game.YELLOW else connectFour.Game.YELLOW
 
-        player_score = self.count_lines(board, player)
-        opponent_score = self.count_lines(board, opponent)
+        player_score = self.game.count_lines(board, player)
+        opponent_score = self.game.count_lines(board, opponent)
 
         # Simple heuristic: difference between player's and opponent's line counts
         heuristic_value = player_score - opponent_score
 
         return heuristic_value / 10.0  # Scale the value between -1 and 1
-
-    def count_lines(self, board, color):
-        lines = (
-            board,  # columns
-            zip(*board),  # rows
-            connectFour.diagonalsPos(board, self.game.cols, self.game.rows),  # positive diagonals
-            connectFour.diagonalsNeg(board, self.game.cols, self.game.rows)  # negative diagonals
-        )
-
-        color_count = 0
-        for line in chain(*lines):
-            color_count += line.count(color)
-
-        return color_count
+    
 
     def monteCarloGS(self, param):
         return
