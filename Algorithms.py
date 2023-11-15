@@ -176,26 +176,27 @@ class Algorithms:
                 game_copy.RED if game_copy.currentPlayer == game_copy.YELLOW else game_copy.YELLOW
             )
 
-    # Algo 4
+    #Algo 4
     def UCT(self, board, parent_simulations):
         if parent_simulations == 0:
-            return float('inf')  #for the first simulation
+            return float('inf')  # for the first simulation
 
-        exploration_constant = 1.4  
+        exploration_constant = 1.4
 
         # Calculate UCT values for all children
         uct_values = []
         for move in self.game.legalMoves():
-            new_board = self.game.makeMove(move, self.game.currentPlayer)[0]
+            temp_game = self.game.copy()  # Create a temporary game instance
+            new_board = temp_game.makeMove(move, temp_game.currentPlayer)[0]
             child_simulations = 0  # You may need to get the actual number of simulations for this child
 
             # Handle the case where child_simulations is zero
             if child_simulations == 0:
                 uct_value = float('inf')
             else:
-                uct_value = self.evaluate(board) + exploration_constant * (
+                uct_value = self.evaluate(new_board) + exploration_constant * (
                         (parent_simulations / child_simulations) ** 0.5)
-            
+
             uct_values.append(uct_value)
 
         # Choose the move with the highest UCT value

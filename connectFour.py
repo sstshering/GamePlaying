@@ -59,11 +59,11 @@ class Game:
                 break
 
         if self.isWinner(color):
-            print(color + ' won!')
+            # print(color + ' won!')
             return self.board, True  #game has ended
 
         if self.isFull():
-            print('The game is a draw!')
+            # print('The game is a draw!')
             return self.board, True
 
         # Switch to the next player
