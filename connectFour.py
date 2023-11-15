@@ -43,29 +43,25 @@ class Game:
         legalMoves = [col for col in range(self.cols) if self.board[col][0] == Game.NONE]
         return legalMoves
 
+    # Make a move by inserting the color in the given column.
     def makeMove(self, column, color):
-        """Make a move by inserting the color in the given column."""
         c = self.board[column]
+    
         if c[0] != Game.NONE:
-            raise Exception('Column is full')
-        i = -1
-        while c[i] != Game.NONE:
-            i -= 1
-        c[i] = color
+            print('Column is full. Choose another column.')
+            return self.board
 
         if self.isWinner(color):
-            #self.printBoard()
-            raise Exception(color + ' won!')
-            # print(color + ' won!')
+            print(color + ' won!')
 
         if self.isFull():
-            #self.printBoard()
-            raise Exception('The game is a draw!')
+            print('The game is a draw!')
 
         # Switch to the next player
         self.currentPlayer = Game.RED if self.currentPlayer == Game.YELLOW else Game.YELLOW
 
         return self.board
+
     
     def isWinner(self, color):
         """Check if the specified color is the winner on the current board."""

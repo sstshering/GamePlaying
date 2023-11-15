@@ -16,22 +16,23 @@ class Algorithms:
         return selected_move
     
     #Algo2
-    def dLMinMax(self, param):
+    def dLMinMax(self, param, verboseType):
         goal = self.game.win
         legal_moves = self.game.legalMoves()
 
-        print("Column:\t Score")
         scores = []
-
+        
         for move in legal_moves:
             new_board = self.game.makeMove(move, self.game.currentPlayer)
             value = self.minmax(new_board, goal, param - 1, float('-inf'), float('+inf'), False)
 
             if value is not None:
                 scores.append(value)
-                print("Column {}: {:.2f}".format(int(move) + 1, float(value)))
+                if verboseType == "Verbose":
+                    print("Column {}: {:.2f}".format(int(move) + 1, float(value)))
             else:
-                print("Column {}: Null".format(float(move) + 1))
+                if verboseType == "Verbose":
+                    print("Column {}: Null".format(float(move) + 1))
 
         if scores:
             best_move = legal_moves[scores.index(max(scores))]
@@ -77,6 +78,7 @@ class Algorithms:
 
         return heuristic_value / 10.0  # Scale the value between -1 and 1
 
+    # counts the occurences of each color
     def count_lines(self, board, color):
         lines = (
             board,  # columns
@@ -91,8 +93,11 @@ class Algorithms:
 
         return color_count
 
-    def monteCarloGS(self, param):
-        return
+    # Algo 3
+    def monteCarloGS(self, param, verboseType):
+        pass
 
-    def upperConfidenceBound(self,param):
-        return
+    # Algo 4
+    def upperConfidenceBound(self, param, verboseType):
+        pass
+       
