@@ -1,7 +1,7 @@
 import connectFour 
 import random
 from itertools import chain
-
+import copy
 class Algorithms:
     def __init__(self, game):
         self.game = game
@@ -92,12 +92,117 @@ class Algorithms:
             color_count += line.count(color)
 
         return color_count
+    
+    #Algo 3 & 4
+    def MCGSUCT(self, param, verboseType, algorithm):
+        legal_moves = self.game.legalMoves()
 
-    # Algo 3
-    def monteCarloGS(self, param, verboseType):
-        pass
+        if not legal_moves:
+            return None
+
+        scores = []
+        total_simulations = 0
+
+        for move in legal_moves:
+            simulations = 0
+            wins = 0
+
+            for _ in range(param):
+                new_board, game_ended = self.game.makeMove(move, self.game.currentPlayer)
+
+                # Check if the game has ended
+                if game_ended:
+                    break
+                
+                if algorithm == "UCT":
+                    result = self.UCT(new_board, simulations)
+                else:  # PMCGS
+                    result = self.PMCGS()
+              
+                simulations += 1
+
+                if result == 1:
+                    wins += 1
+
+            if verboseType == "Verbose":
+                print("wi:{} ".format(wins))
+                print("ni: {}".format(simulations))
+                print("Move selected: {}".format(move))
+
+            # Avoid division by zero
+            score = wins / simulations if simulations > 0 else 0
+            scores.append(score)
+            total_simulations += simulations
+
+            # Check if the game has ended
+            if game_ended:
+                break
+
+        if verboseType == "Verbose":
+            for i, move in enumerate(legal_moves):
+                print("Column " + str(move + 1) + ": " + str(scores[i]))
+
+        if total_simulations == 0:
+            return None
+        
+        # Check if legal_moves is empty before finding the best move
+        if legal_moves:
+            best_move = legal_moves[scores.index(max(scores))]
+            return best_move
+        else:
+            return None
+
+    # ALgo 3
+    def PMCGS(self):
+        # Create a copy of the game object to avoid modifying the original state
+        game_copy = self.game.copy()
+
+        while True:
+            legal_moves = game_copy.legalMoves()
+
+            if not legal_moves:
+                return 0  # Draw
+
+            move = random.choice(legal_moves)
+            game_copy.makeMove(move, game_copy.currentPlayer)
+
+            if game_copy.isWinner(game_copy.currentPlayer):
+                return 1  # Win
+            elif game_copy.isFull():
+                return 0  # Draw
+
+            # Update the player after making a move
+            game_copy.currentPlayer = (
+                game_copy.RED if game_copy.currentPlayer == game_copy.YELLOW else game_copy.YELLOW
+            )
 
     # Algo 4
-    def upperConfidenceBound(self, param, verboseType):
-        pass
+    def UCT(self, board, parent_simulations):
+        if parent_simulations == 0:
+            return float('inf')  #for the first simulation
+
+        exploration_constant = 1.4  
+
+        # Calculate UCT values for all children
+        uct_values = []
+        for move in self.game.legalMoves():
+            new_board = self.game.makeMove(move, self.game.currentPlayer)[0]
+            child_simulations = 0  # You may need to get the actual number of simulations for this child
+
+            # Handle the case where child_simulations is zero
+            if child_simulations == 0:
+                uct_value = float('inf')
+            else:
+                uct_value = self.evaluate(board) + exploration_constant * (
+                        (parent_simulations / child_simulations) ** 0.5)
+            
+            uct_values.append(uct_value)
+
+        # Choose the move with the highest UCT value
+        best_move = self.game.legalMoves()[uct_values.index(max(uct_values))]
+
+        return best_move
+
+
+
        

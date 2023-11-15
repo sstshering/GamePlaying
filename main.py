@@ -24,10 +24,8 @@ def main():
             output = Algorithms_inst.uniformRandom()
         elif algorithm == "DLMM":
             output = Algorithms_inst.dLMinMax(int(param), verboseType)
-        elif algorithm == "PMCGS":
-            output = Algorithms_inst.monteCarloGS(int(param), verboseType)
-        elif algorithm == "UCT":
-            output = Algorithms_inst.upperConfidenceBound(int(param), verboseType)
+        elif algorithm == "PMCGS" or algorithm == "UCT":
+            output = Algorithms_inst.MCGSUCT(int(param), verboseType, algorithm)
         else:
             print("Invalid algorithm:", algorithm)
             sys.exit(1)

@@ -44,25 +44,34 @@ class Game:
         return legalMoves
 
     # Make a move by inserting the color in the given column.
+    # Inside the Game class
     def makeMove(self, column, color):
         c = self.board[column]
-    
+
         if c[0] != Game.NONE:
             print('Column is full. Choose another column.')
-            return self.board
+            return self.board, False  #game hasn't ended
+
+        # Find the first empty slot in the column and fill it with the current player's color
+        for i in range(self.rows - 1, -1, -1):
+            if self.board[column][i] == Game.NONE:
+                self.board[column][i] = color
+                break
 
         if self.isWinner(color):
             print(color + ' won!')
+            return self.board, True  #game has ended
 
         if self.isFull():
             print('The game is a draw!')
+            return self.board, True
 
         # Switch to the next player
         self.currentPlayer = Game.RED if self.currentPlayer == Game.YELLOW else Game.YELLOW
 
-        return self.board
-
+        return self.board, False 
     
+    # checks the winner
     def isWinner(self, color):
         """Check if the specified color is the winner on the current board."""
         lines = (
@@ -88,4 +97,13 @@ class Game:
         for y in range(self.rows):
             print('  '.join(str(self.board[x][y]) for x in range(self.cols)))
     
-    
+    #Create a copy of the current game state.
+    def copy(self):
+        new_game = Game(
+            board=[row[:] for row in self.board],
+            player=self.currentPlayer,
+            cols=self.cols,
+            rows=self.rows,
+            requiredToWin=self.win
+        )
+        return new_game
