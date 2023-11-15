@@ -38,6 +38,13 @@ class Game:
         self.win = requiredToWin
         self.board = board
         self.currentPlayer = player
+        self.simulationcounter = 0
+    
+    def simulations_counter(self):
+        self.simulationcounter += 1
+
+    def get_simulations(self):
+        return self.simulationcounter
 
     def legalMoves(self):
         legalMoves = [col for col in range(self.cols) if self.board[col][0] == Game.NONE]
@@ -49,7 +56,6 @@ class Game:
         c = self.board[column]
 
         if c[0] != Game.NONE:
-            print('Column is full. Choose another column.')
             return self.board, False  #game hasn't ended
 
         # Find the first empty slot in the column and fill it with the current player's color
@@ -59,11 +65,9 @@ class Game:
                 break
 
         if self.isWinner(color):
-            # print(color + ' won!')
             return self.board, True  #game has ended
 
         if self.isFull():
-            # print('The game is a draw!')
             return self.board, True
 
         # Switch to the next player
