@@ -65,35 +65,8 @@ class Algorithms:
                     break
             return min_eval
 
-    # Evaluate the desirability of the board state for the current player.
-    def evaluate(self, board):
-        player = self.game.currentPlayer
-        opponent = connectFour.Game.RED if player == connectFour.Game.YELLOW else connectFour.Game.YELLOW
-
-        player_score = self.count_lines(board, player)
-        opponent_score = self.count_lines(board, opponent)
-
-        # Simple heuristic: difference between player's and opponent's line counts
-        heuristic_value = player_score - opponent_score
-
-        return heuristic_value / 10.0  # Scale the value between -1 and 1
-
-    # counts the occurences of each color
-    def count_lines(self, board, color):
-        lines = (
-            board,  # columns
-            zip(*board),  # rows
-            connectFour.diagonalsPos(board, self.game.cols, self.game.rows),  # positive diagonals
-            connectFour.diagonalsNeg(board, self.game.cols, self.game.rows)  # negative diagonals
-        )
-
-        color_count = 0
-        for line in chain(*lines):
-            color_count += line.count(color)
-
-        return color_count
-    
     #Algo 3 & 4
+  
     def MCGSUCT(self, param, verboseType, algorithm):
         legal_moves = self.game.legalMoves()
 
@@ -104,21 +77,24 @@ class Algorithms:
         total_simulations = 0
 
         for move in legal_moves:
-            simulations = 0
             wins = 0
 
-            for _ in range(param):
-                new_board, game_ended = self.game.makeMove(move, self.game.currentPlayer)
+            for _ in range(param): 
+                new_game = self.game.copy()
+                new_board, game_ended = new_game.makeMove(move, new_game.currentPlayer)
 
                 # Check if the game has ended
                 if game_ended:
                     break
+                    
+                new_game.simulations_counter() 
+                simulations = new_game.get_simulations()
                 
                 if algorithm == "UCT":
-                    result = self.UCT(new_board, simulations)
+                    result = self.uctHeuristic(new_board, simulations, new_game)
                 else:  # PMCGS
-                    result = self.PMCGS()
-              
+                    result = self.PMCGS(new_game)
+            
                 simulations += 1
 
                 if result == 1:
@@ -140,70 +116,129 @@ class Algorithms:
 
         if verboseType == "Verbose":
             for i, move in enumerate(legal_moves):
-                print("Column " + str(move + 1) + ": " + str(scores[i]))
+                print("Column " + str(move) + ": " + str(scores[i]))
 
         if total_simulations == 0:
             return None
-        
-        # Check if legal_moves is empty before finding the best move
+
+        # if legal_moves is empty 
         if legal_moves:
             best_move = legal_moves[scores.index(max(scores))]
             return best_move
         else:
             return None
 
-    # ALgo 3
-    def PMCGS(self):
-        # Create a copy of the game object to avoid modifying the original state
-        game_copy = self.game.copy()
-
-        while True:
-            legal_moves = game_copy.legalMoves()
+    # Algo 3
+    def PMCGS(self, new_game):
+        while not new_game.isWinner(new_game.currentPlayer) and not new_game.isFull():
+            legal_moves = new_game.legalMoves()
 
             if not legal_moves:
                 return 0  # Draw
 
             move = random.choice(legal_moves)
-            game_copy.makeMove(move, game_copy.currentPlayer)
-
-            if game_copy.isWinner(game_copy.currentPlayer):
-                return 1  # Win
-            elif game_copy.isFull():
-                return 0  # Draw
+            new_game.makeMove(move, new_game.currentPlayer)
 
             # Update the player after making a move
-            game_copy.currentPlayer = (
-                game_copy.RED if game_copy.currentPlayer == game_copy.YELLOW else game_copy.YELLOW
+            new_game.currentPlayer = (
+                new_game.RED if new_game.currentPlayer == new_game.YELLOW else new_game.YELLOW
             )
 
-    #Algo 4
-    def UCT(self, board, parent_simulations):
+        if new_game.isWinner(new_game.currentPlayer):
+            return 1  # Win
+        elif new_game.isFull():
+            return 0  # Draw
+        
+    # #Algo 4
+    def uctHeuristic(self, board, parent_simulations, new_game):
         if parent_simulations == 0:
             return float('inf')  # for the first simulation
 
         exploration_constant = 1.4
 
-        # Calculate UCT values for all children
+        # Calculate UCT values for all children with heuristic
         uct_values = []
-        for move in self.game.legalMoves():
-            temp_game = self.game.copy()  # Create a temporary game instance
-            new_board = temp_game.makeMove(move, temp_game.currentPlayer)[0]
-            child_simulations = 0  # You may need to get the actual number of simulations for this child
 
-            # Handle the case where child_simulations is zero
+        for move in self.game.legalMoves():            
+            child_simulations = new_game.get_simulations()            
+            
+            # estimate the desirability of the state
+            heuristic_value = self.evaluate(board)
+
             if child_simulations == 0:
                 uct_value = float('inf')
             else:
-                uct_value = self.evaluate(new_board) + exploration_constant * (
+                uct_value = heuristic_value + exploration_constant * (
                         (parent_simulations / child_simulations) ** 0.5)
 
             uct_values.append(uct_value)
 
-        # Choose the move with the highest UCT value
-        best_move = self.game.legalMoves()[uct_values.index(max(uct_values))]
+        # Check if empty 
+        if uct_values:
+            best_move = self.game.legalMoves()[uct_values.index(max(uct_values))]
+            return best_move
+        else:
+            return None
+     
+    #  without heuristic UCT
+    # def uct(self, parent_simulations):
+    #     if parent_simulations == 0:
+    #         return float('inf')  # for the first simulation
 
-        return best_move
+    #     exploration_constant = 1.4
 
+    #     # Calculate UCT values for all children without heuristic
+    #     uct_values = []
 
+    #     for move in self.game.legalMoves():
+    #         child_simulations = self.game.get_simulations()
+
+    #         if child_simulations == 0:
+    #             uct_value = float('inf')
+    #         else:
+    #             uct_value = exploration_constant * (
+    #                     (parent_simulations / child_simulations) ** 0.5)
+
+    #         uct_values.append(uct_value)
+
+    #     # Check if empty 
+    #     if uct_values:
+    #         best_move = self.game.legalMoves()[uct_values.index(max(uct_values))]
+    #         return best_move
+    #     else:
+    #         return None
+
+    # Evaluate the desirability of the board state for the current player.
+    def evaluate(self, board):
+        player = self.game.currentPlayer
+        opponent = connectFour.Game.RED if player == connectFour.Game.YELLOW else connectFour.Game.YELLOW
+
+        player_score = self.count_lines(board, player)
+        opponent_score = self.count_lines(board, opponent)
+
+        # Simple heuristic: difference between player's and opponent's line counts
+        heuristic_value = player_score - opponent_score
+
+        return heuristic_value / 10.0  # Scale the value between -1 and 1
+
+    # counts the occurences of each color
+    def count_lines(self, board, color):    
+        # Transpose the board to represent columns
+        transposed_board = list(zip(*board))
+
+        lines = (
+            board,  # columns
+            transposed_board,  # rows
+            connectFour.diagonalsPos(board, self.game.cols, self.game.rows),  # positive diagonals
+            connectFour.diagonalsNeg(board, self.game.cols, self.game.rows)  # negative diagonals
+        )
+
+        color_count = 0
+        for line in chain(*lines):
+            color_count += line.count(color)
+
+        return color_count
+
+    
 
        
