@@ -21,10 +21,10 @@ class Algorithms:
         legal_moves = self.game.legalMoves()
 
         scores = []
-        
+
         for move in legal_moves:
-            new_board = self.game.makeMove(move, self.game.currentPlayer)
-            value = self.minmax(new_board, goal, param - 1, float('-inf'), float('+inf'), False)
+            new_board, game_ended = self.game.makeMove(move, self.game.currentPlayer)
+            value = self.minmax(new_board, goal, param - 1, float('-inf'), float('+inf'), False, game_ended)
 
             if value is not None:
                 scores.append(value)
@@ -40,15 +40,15 @@ class Algorithms:
         else:
             return None
 
-    def minmax(self, board, goal, depth, alpha, beta, max_player):
-        if depth == 0 or self.game.isWinner(self.game.currentPlayer) or self.game.isFull():
+    def minmax(self, board, goal, depth, alpha, beta, max_player, game_ended):
+        if depth == 0 or game_ended:
             return self.evaluate(board)
 
         if max_player:
             max_eval = float('-inf')
             for move in self.game.legalMoves():
-                new_board = self.game.makeMove(move, self.game.currentPlayer)
-                eval = self.minmax(new_board, goal, depth - 1, alpha, beta, False)
+                new_board, game_ended = self.game.makeMove(move, self.game.currentPlayer)
+                eval = self.minmax(new_board, goal, depth - 1, alpha, beta, False, game_ended)
                 max_eval = max(max_eval, eval)
                 alpha = max(alpha, eval)
                 if beta <= alpha:
@@ -57,13 +57,14 @@ class Algorithms:
         else:
             min_eval = float('+inf')
             for move in self.game.legalMoves():
-                new_board = self.game.makeMove(move, self.game.currentPlayer)
-                eval = self.minmax(new_board, goal, depth - 1, alpha, beta, True)
+                new_board, game_ended = self.game.makeMove(move, self.game.currentPlayer)
+                eval = self.minmax(new_board, goal, depth - 1, alpha, beta, True, game_ended)
                 min_eval = min(min_eval, eval)
                 beta = min(beta, eval)
                 if beta <= alpha:
                     break
             return min_eval
+
 
     #Algo 3 & 4
   
